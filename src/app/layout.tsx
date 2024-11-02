@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { SongBar } from "@/components/SongBar";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -26,9 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen grid grid-rows-[1fr_auto]`}
       >
-        {children}
+        <div className="max-h-[90vh] overflow-y-scroll">{children}</div>
+
+        <SongBar />
       </body>
     </html>
   );
