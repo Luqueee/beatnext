@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-
+import { search, getInfo, get } from "@/lib/soundcloud";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useMusicStore } from "@/store/musicStore";
+import {
+  useMusicStore,
+  type MusicStore,
+  type Search,
+} from "@/store/musicStore";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,34 +15,23 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 export default function Songs() {
   const {
-    currentMusic,
-    setIsPlaying,
-    songLink,
-    volume,
-    isPlayingBar,
-    isPlaying,
-    previousID,
-    currentTime,
-    setSongLink,
     setIsPlayingBar,
     setCurrentMusic,
-    setPreviousID,
-    searchTerm,
-    setSearchTerm,
     searching,
     setSearching,
     setCurrentTime,
-  } = useMusicStore((state) => state);
+  }: MusicStore = useMusicStore((state) => state);
   const [input, setInput] = useState("despacito");
 
-  const [songs, setSongs] = useState([]);
+  const [songs, setSongs] = useState<Search[]>([]);
   const fetchSongs = async (input: string) => {
-    await fetch(`${API_URL}/api/search?q=${input}`, {
-      method: "GET",
-    })
-      .then((res) => {
-        return res.json();
-      })
+    // await fetch(`${API_URL}/api/search?q=${input}`, {
+    //   method: "GET",
+    // })
+    await search(input)
+      // .then((res) => {
+      //   return res.json();
+      // })
       .then((data) => {
         console.log(data);
         setSongs(data);
@@ -73,41 +66,38 @@ export default function Songs() {
 
   const fetchSong = async (query: string) => {
     console.log(query, API_URL);
-    await fetch(`${API_URL}/api/song?id=${query}`, {
-      method: "GET",
-    })
-      .then((res) => {
-        const song = res.arrayBuffer();
-        song.then(async (buffer) => {
-          const blob = URL.createObjectURL(new Blob([buffer]));
+    // await fetch(`${API_URL}/api/song?id=${query}`, {
+    //   method: "GET",
+    // })
+    get(query).then(async (res) => {
+      console.log(res);
 
-          const info_req = await fetch(`${API_URL}/api/song-info?id=${query}`, {
-            method: "GET",
-          });
-          const data = await info_req.json();
-          console.log("data", data, blob);
-          setCurrentMusic({
-            song: blob,
-            preview_image: data.artwork_url,
-            title: data.title,
-            artist: data.artist,
-          });
+      if (res) {
+        // Decode base64 string to binary string
+        const binaryString = atob(res);
+        // Convert binary string to ArrayBuffer
+        const arrayBuffer = new Uint8Array(
+          [...binaryString].map((char) => char.charCodeAt(0))
+        ).buffer;
 
-          setIsPlayingBar(true);
-          setCurrentTime(0);
+        const blob = new Blob([arrayBuffer]);
+        console.log("data", blob);
+        const data = await getInfo(query);
+        setCurrentMusic({
+          song: blob as unknown as Blob,
+          preview_image: data.artwork_url,
+          title: data.title,
+          artist: data.artist,
         });
-      })
 
-      .catch((err) => {
-        console.log(err);
-      });
+        setIsPlayingBar(true);
+        setCurrentTime(0);
+      } else {
+        console.error("Buffer is undefined");
+        return;
+      }
+    });
   };
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  //   useEffect(() => {
-  //     console.log(input);
-  //     fetchSongs(input);
-  //   }, [debounce]);
 
   return (
     <div className="">
@@ -132,12 +122,12 @@ export default function Songs() {
               {title} - {artist}{" "}
             </span>
             {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-            <button onClick={() => fetchSong(id)}>Reproducir</button>
+            <button onClick={() => fetchSong(id as unknown as string)}>
+              Reproducir
+            </button>
           </div>
         ))}
       </div>
-      {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
-      {/* <audio controls ref={audio} /> */}
     </div>
   );
 }

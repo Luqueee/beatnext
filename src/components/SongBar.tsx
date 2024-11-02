@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useMusicStore } from "@/store/musicStore";
 import { useEffect, useRef, useState } from "react";
@@ -260,14 +261,19 @@ const CurrentSong = ({ image, id, title, artists }: CurrentSongProps) => {
   );
 };
 
-const SongControl = ({ audio }) => {
+interface SongControlProps {
+  audio: React.RefObject<HTMLAudioElement>;
+}
+
+const SongControl = ({ audio }: SongControlProps) => {
   const { currentTime, setCurrentTime } = useMusicStore((state) => state);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    audio.current.addEventListener("timeupdate", handleTimeUpdate);
+    audio.current?.addEventListener("timeupdate", handleTimeUpdate);
 
     const interval = setInterval(() => {
-      setCurrentTime(audio.current.currentTime);
+      if (audio.current) setCurrentTime(audio.current.currentTime);
     }, 100);
 
     return () => {
@@ -277,7 +283,7 @@ const SongControl = ({ audio }) => {
   }, [audio]);
 
   const handleTimeUpdate = () => {
-    setCurrentTime(audio.current.currentTime);
+    if (audio.current) setCurrentTime(audio.current.currentTime);
   };
 
   const formatTime = (time: number) => {
@@ -304,7 +310,7 @@ const SongControl = ({ audio }) => {
         className="md:lg:w-[200px] w-[100px] h-2 py-2"
         onValueChange={(value) => {
           const [newCurrentTime] = value;
-          audio.current.currentTime = newCurrentTime;
+          if (audio.current) audio.current.currentTime = newCurrentTime;
           // eslint-disable-next-line @typescript-eslint/no-unused-expressions
           currentTime;
         }}
@@ -363,11 +369,19 @@ const VolumeControl = () => {
     </div>
   );
 };
+
+interface CurrentMusic {
+  song: Blob;
+  title: string;
+  artist: string;
+  id: number;
+  preview_image: string;
+}
+
 export function SongBar() {
   const {
     currentMusic,
     setIsPlaying,
-    songLink,
     volume,
     isPlayingBar,
     isPlaying,
@@ -380,12 +394,12 @@ export function SongBar() {
   } = useMusicStore((state) => state);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const [titleSong, setTitle] = useState(null);
-  const [artistSong, setArtist] = useState(null);
-  const [imageSong, setImage] = useState(null);
+  const [titleSong, setTitle] = useState("");
+  const [artistSong, setArtist] = useState("");
+  const [imageSong, setImage] = useState("");
 
   const configMusicInitial = () => {
-    const song_data = currentMusic;
+    const song_data = currentMusic as unknown as CurrentMusic;
     if (audioRef.current) {
       if (audioRef.current) {
         audioRef.current.volume = volume;
@@ -398,7 +412,7 @@ export function SongBar() {
       if (song_data && song_data.id !== previousID) {
         //console.log('new', currentMusic, previousID);
         if (audioRef.current) {
-          audioRef.current.src = song_data.song; // Change the source
+          audioRef.current.src = URL.createObjectURL(song_data.song); // Change the source
           audioRef.current.load(); // Load the new source
           audioRef.current.currentTime = currentTime;
           if (isPlayingBar) {
@@ -471,9 +485,7 @@ export function SongBar() {
         // 32 es el código de la tecla de espacio
         event.preventDefault();
         setIsPlayingBar(!isPlayingBar); // Alternar entre pausa y reproducción
-        if (songLink === true) {
-          setIsPlaying(!isPlaying);
-        }
+        setIsPlaying(!isPlaying);
       }
     };
 
@@ -488,9 +500,9 @@ export function SongBar() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    window.addEventListener("beforeunload", setPreviousID(0));
+    window.addEventListener("beforeunload", () => setPreviousID(0));
     return () => {
-      window.removeEventListener("beforeunload", setPreviousID(0));
+      window.removeEventListener("beforeunload", () => setPreviousID(0));
     };
   }, [previousID]);
 
