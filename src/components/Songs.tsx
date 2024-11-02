@@ -9,7 +9,7 @@ import {
   type Search,
 } from "@/store/musicStore";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
