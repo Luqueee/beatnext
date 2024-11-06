@@ -158,6 +158,7 @@ export default function SongBar() {
               audioRef.current.src = URL.createObjectURL(blob); // Change the source
               audioRef.current.load(); // Load the new source
               audioRef.current.currentTime = currentTime;
+              setIsPlaying(true);
               if (isPlaying) {
                 try {
                   audioRef.current

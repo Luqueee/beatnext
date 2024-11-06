@@ -76,7 +76,7 @@ export default function Songs() {
       title: title,
       artist: artist,
     });
-    setIsPlaying(true);
+
     setCurrentTime(0);
   };
 
@@ -105,7 +105,7 @@ export default function Songs() {
 
   return (
     <div className="pt-2">
-      <div className=" h-10  flex justify-center items-center px-2">
+      <div className=" h-10 mb-4  flex justify-center items-center px-2">
         <input
           type="text"
           value={input}
@@ -123,7 +123,10 @@ export default function Songs() {
       </button> */}
       <div className="flex flex-col gap-4 ml-2">
         {songs.map(({ title, artist, artwork, id, kind }) => (
-          <div key={id} className="flex gap-8">
+          <div
+            key={id}
+            className="flex md:lg:flex-row flex-col items-center gap-8"
+          >
             <Image
               src={artwork}
               alt="album cover"
@@ -136,14 +139,15 @@ export default function Songs() {
               }`}
             />
             <div className=" flex gap-8 justify-center items-start my-auto">
-              <div>
-                <p>{title}</p>
-                <p className="flex items-center gap-2">
+              <div className="md:lg:items-start flex-col items-center flex">
+                <p className=" w-fit text-center">{title}</p>
+                <p className="flex items-center w-fit gap-2">
                   {kind === "track" && <MusicIcon />}
                   <span>{artist}</span>
                 </p>
               </div>
-
+            </div>
+            <div className=" flex gap-4 h-14">
               {kind === "track" && (
                 <>
                   <button

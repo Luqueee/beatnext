@@ -2,6 +2,16 @@
 import type { Search } from "@/store/musicStore";
 const client_id = "6ZQ2Vr6GmERVhpEmkZmcNAuDQ3l9qaZe";
 
+interface SearchInterface {
+  id: number;
+  title: string;
+  artist: string;
+  duration: number;
+  artwork: string;
+  endpoint: string;
+  kind: string;
+}
+
 export async function search(query: string): Promise<Search[]> {
   const fetch_url = `https://api-v2.soundcloud.com/search?q=${query}&client_id=${client_id}&limit=20&offset=0&app_locale=es`;
   const req_song = await fetch(fetch_url);
@@ -35,8 +45,15 @@ export async function search(query: string): Promise<Search[]> {
         song.artist !== "Unknown"
     );
 
+  const tracks = songs.filter((song: SearchInterface) => song.kind === "track");
+  const playlists = songs.filter(
+    (song: SearchInterface) => song.kind === "playlist"
+  );
+
+  const sorted = [...tracks, ...playlists];
+
   //console.log(songs);
-  return songs;
+  return sorted;
 }
 
 export async function getInfo(id: string): Promise<{
