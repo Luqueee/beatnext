@@ -8,13 +8,8 @@ import { useRef, useState } from "react";
 import download from "downloadjs";
 
 export default function Songs() {
-  const {
-    setCurrentMusic,
-    searching,
-    setSearching,
-    setCurrentTime,
-    setIsPlaying,
-  } = useMusicStore((state) => state);
+  const { setCurrentMusic, searching, setSearching, setCurrentTime } =
+    useMusicStore((state) => state);
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
