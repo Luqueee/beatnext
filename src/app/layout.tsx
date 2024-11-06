@@ -27,9 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen grid grid-rows-[1fr_auto]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative max-w-screen overflow-x-hidden h-[100dvh] grid grid-rows-[auto_80px]`}
       >
-        <div className="max-h-[90vh] overflow-y-scroll">{children}</div>
+        <div className="overflow-y-scroll ">{children}</div>
 
         <SongBar />
       </body>

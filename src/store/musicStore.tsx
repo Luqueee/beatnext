@@ -3,10 +3,10 @@ import { persist } from "zustand/middleware";
 
 // TODO: Add previousID to Music Store to look if the previousID match with the currentID
 interface CurrentMusic {
-  song: Blob;
+  song?: Blob | undefined;
   title: string;
   artist: string;
-  id?: string;
+  id?: number | undefined;
   preview_image: string;
 }
 
@@ -15,14 +15,13 @@ export interface Search {
   title: string;
   artist: string;
   duration: number;
+  kind: string;
   artwork: string;
   endpoint: string;
 }
 
 export interface MusicStore {
   isPlaying: boolean;
-  isPlayingBar: boolean;
-  songlink: boolean;
   currentTime: number;
   previousID: number;
   writing: boolean;
@@ -32,9 +31,8 @@ export interface MusicStore {
   setVolume: (volume: number) => void;
   setWriting: (writing: boolean) => void;
   setIsPlaying: (isPlaying: boolean) => void;
-  setIsPlayingBar: (isPlayingBar: boolean) => void;
-  setCurrentMusic: (currentMusic: CurrentMusic) => CurrentMusic;
-  setSongLink: (songlink: boolean) => void;
+  getIsPlaying: () => boolean;
+  setCurrentMusic: (currentMusic: CurrentMusic) => void;
   setCurrentTime: (currentTime: number) => void;
   setPreviousID: (previousID: number) => void;
   setSearching: (searching: boolean) => void;
@@ -42,15 +40,14 @@ export interface MusicStore {
 
 export const useMusicStore = create<MusicStore, [["zustand/persist", unknown]]>(
   persist<MusicStore>(
-    (set) => ({
+    (set, get) => ({
       isPlaying: false,
-      isPlayingBar: false,
-      songlink: false,
       currentTime: 0,
       previousID: 0,
       writing: false,
       currentMusic: {
-        song: new Blob(),
+        id: undefined,
+        song: undefined,
         title: "",
         artist: "",
         preview_image: "",
@@ -60,12 +57,10 @@ export const useMusicStore = create<MusicStore, [["zustand/persist", unknown]]>(
       setVolume: (volume: number) => set({ volume }),
       setWriting: (writing: boolean) => set({ writing }),
       setIsPlaying: (isPlaying: boolean) => set({ isPlaying }),
-      setIsPlayingBar: (isPlayingBar: boolean) => set({ isPlayingBar }),
-      setCurrentMusic: (currentMusic: CurrentMusic) => {
-        set({ currentMusic });
-        return currentMusic;
+      getIsPlaying: () => {
+        return get().isPlaying;
       },
-      setSongLink: (songlink: boolean) => set({ songlink }),
+      setCurrentMusic: (currentMusic: CurrentMusic) => set({ currentMusic }),
       setCurrentTime: (currentTime: number) => set({ currentTime }),
       setPreviousID: (previousID: number) => set({ previousID }),
       setSearching: (searching: boolean) => set({ searching }),

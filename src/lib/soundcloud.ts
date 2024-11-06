@@ -3,7 +3,7 @@ import type { Search } from "@/store/musicStore";
 const client_id = "6ZQ2Vr6GmERVhpEmkZmcNAuDQ3l9qaZe";
 
 export async function search(query: string): Promise<Search[]> {
-  const fetch_url = `https://api-v2.soundcloud.com/search?q=${query}&client_id=${client_id}`;
+  const fetch_url = `https://api-v2.soundcloud.com/search?q=${query}&client_id=${client_id}&limit=20&offset=0&app_locale=es`;
   const req_song = await fetch(fetch_url);
   const data = await req_song.json();
   const songs = data.collection
@@ -14,6 +14,7 @@ export async function search(query: string): Promise<Search[]> {
         user: { username: string; avatar_url: string };
         duration: number;
         artwork_url: string;
+        kind: "playlist" | "track";
       }) => {
         return {
           id: song.id,
@@ -22,6 +23,7 @@ export async function search(query: string): Promise<Search[]> {
           duration: song?.duration || 0,
           artwork: song?.artwork_url || song?.user?.avatar_url || null,
           endpoint: `/song?id=${song.id}`,
+          kind: song.kind,
         };
       }
     )
@@ -40,6 +42,7 @@ export async function search(query: string): Promise<Search[]> {
 export async function getInfo(id: string): Promise<{
   title: string;
   artist: string;
+  id: number;
   artwork_url: string;
 }> {
   const fetch_url = `https://api-v2.soundcloud.com/tracks/${id}?client_id=${client_id}`;

@@ -1,37 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { search, getInfo, get } from "@/lib/soundcloud";
+import { get, search } from "@/lib/soundcloud";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  useMusicStore,
-  type MusicStore,
-  type Search,
-} from "@/store/musicStore";
+import { useMusicStore, type Search } from "@/store/musicStore";
+import { MusicIcon } from "./icons";
 import Image from "next/image";
-import { useState } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
+import { useRef, useState } from "react";
+import download from "downloadjs";
 
 export default function Songs() {
   const {
-    setIsPlayingBar,
     setCurrentMusic,
     searching,
     setSearching,
     setCurrentTime,
-  }: MusicStore = useMusicStore((state) => state);
-  const [input, setInput] = useState("despacito");
+    setIsPlaying,
+  } = useMusicStore((state) => state);
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [songs, setSongs] = useState<Search[]>([]);
   const fetchSongs = async (input: string) => {
-    // await fetch(`${API_URL}/api/search?q=${input}`, {
-    //   method: "GET",
-    // })
+    console.log("fetching songs", input);
     await search(input)
-      // .then((res) => {
-      //   return res.json();
-      // })
       .then((data) => {
         console.log(data);
         setSongs(data);
@@ -42,7 +32,7 @@ export default function Songs() {
   };
 
   const handleSearchDebounced = useDebounce(() => {
-    fetchSongs(input);
+    fetchSongs(inputRef.current?.value as string);
   }, 500);
 
   const handleInputFocus = () => {
@@ -64,13 +54,36 @@ export default function Songs() {
     handleSearchDebounced();
   };
 
-  const fetchSong = async (query: string) => {
-    console.log(query, API_URL);
-    // await fetch(`${API_URL}/api/song?id=${query}`, {
-    //   method: "GET",
-    // })
-    get(query).then(async (res) => {
-      console.log(res);
+  const fetchSong = async (
+    artwork_url: string,
+    id: number,
+    title: string,
+    artist: string
+  ) => {
+    //console.log(query, API_URL);
+
+    // const data = await getInfo(query);
+    // console.log("data", data);
+    // setCurrentMusic({
+    //   preview_image: data.artwork_url,
+    //   id: data.id,
+    //   title: data.title,
+    //   artist: data.artist ?? data.publisher_metadata.release_title,
+    // });
+    setCurrentMusic({
+      preview_image: artwork_url,
+      id: id,
+      title: title,
+      artist: artist,
+    });
+    setIsPlaying(true);
+    setCurrentTime(0);
+  };
+
+  const download_song = (id: number, name: string) => {
+    console.log("Downloading", id);
+    get(id.toString()).then(async (res) => {
+      //console.log(res);
 
       if (res) {
         // Decode base64 string to binary string
@@ -81,17 +94,8 @@ export default function Songs() {
         ).buffer;
 
         const blob = new Blob([arrayBuffer]);
-        console.log("data", blob);
-        const data = await getInfo(query);
-        setCurrentMusic({
-          song: blob as unknown as Blob,
-          preview_image: data.artwork_url,
-          title: data.title,
-          artist: data.artist,
-        });
-
-        setIsPlayingBar(true);
-        setCurrentTime(0);
+        console.log("song", blob);
+        download(blob, `${name}.mp3`, "audio/mp3");
       } else {
         console.error("Buffer is undefined");
         return;
@@ -100,31 +104,65 @@ export default function Songs() {
   };
 
   return (
-    <div className="">
-      <input
-        type="text"
-        value={input}
-        onFocus={handleInputFocus}
-        onBlur={handleInputBlur}
-        placeholder="Search for a song..."
-        onChange={handleInput}
-        className="text-black"
-      />
-      {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-      <button onClick={() => fetchSongs(input)}>
+    <div className="pt-2">
+      <div className=" h-10  flex justify-center items-center px-2">
+        <input
+          type="text"
+          value={input}
+          ref={inputRef}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
+          placeholder="Search for a song..."
+          onChange={handleInput}
+          className="text-black md:lg:w-[40%] w-full rounded-lg pl-2 h-full"
+        />
+      </div>
+
+      {/* <button onClick={() => fetchSongs(input)}>
         <span>Search</span>
-      </button>
-      <div>
-        {songs.map(({ title, artist, artwork, id }) => (
-          <div key={id}>
-            <Image src={artwork} alt="album cover" width={100} height={100} />
-            <span>
-              {title} - {artist}{" "}
-            </span>
-            {/* biome-ignore lint/a11y/useButtonType: <explanation> */}
-            <button onClick={() => fetchSong(id as unknown as string)}>
-              Reproducir
-            </button>
+      </button> */}
+      <div className="flex flex-col gap-4 ml-2">
+        {songs.map(({ title, artist, artwork, id, kind }) => (
+          <div key={id} className="flex gap-8">
+            <Image
+              src={artwork}
+              alt="album cover"
+              width={100}
+              height={100}
+              unoptimized
+              draggable={false}
+              className={`${
+                kind === "playlist" ? "rounded-md" : "rounded-full"
+              }`}
+            />
+            <div className=" flex gap-8 justify-center items-start my-auto">
+              <div>
+                <p>{title}</p>
+                <p className="flex items-center gap-2">
+                  {kind === "track" && <MusicIcon />}
+                  <span>{artist}</span>
+                </p>
+              </div>
+
+              {kind === "track" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => fetchSong(artwork, id, title, artist)}
+                    className=" border-2 w-24 border-white rounded-md p-2"
+                  >
+                    Reproducir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => download_song(id, title)}
+                    className=" border-2 w-24 border-white rounded-md p-2"
+                  >
+                    Descargar
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         ))}
       </div>
