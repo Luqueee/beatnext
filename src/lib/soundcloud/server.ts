@@ -1,5 +1,5 @@
 "use server";
-const client_id = "6ZQ2Vr6GmERVhpEmkZmcNAuDQ3l9qaZe";
+const client_id = process.env.NEXT_PUBLIC_SOUNDCLOUD_CLIENT_ID;
 
 export async function search(query: string): Promise<SoundCloud.Search[]> {
   const fetch_url = `https://api-v2.soundcloud.com/search?q=${query}&client_id=${client_id}&limit=40&offset=0&app_locale=es`;

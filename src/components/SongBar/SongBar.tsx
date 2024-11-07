@@ -27,7 +27,6 @@ export default function SongBar() {
     setVolume,
     currentTime,
     setCurrentTime,
-    setSearching,
     currentMusic,
     hydrated,
   } = useMusicStore((state) => state);

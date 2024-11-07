@@ -3,7 +3,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { search } from "@/lib/soundcloud/server";
 import { useMusicStore } from "@/store/musicStore";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import SearchModal from "./SearchModal";
 import useWindow from "@/hooks/useWindow";
 import { cn } from "@/lib/utils";
@@ -55,7 +55,7 @@ export default function SearchBar({
   return (
     <div
       className={`${
-        isInModal ? "w-full" : "md:lg:w-[40%] h-[70%] w-full px-2"
+        isInModal ? "w-full" : "md:lg:w-[40%] h-[60%] w-full px-2"
       } h-full ${className} inline-flex absolute left-1/2 transform -translate-x-1/2`}
     >
       {isDesktop && (

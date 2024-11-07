@@ -3,8 +3,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { search } from "@/lib/soundcloud/server";
 import { useMusicStore } from "@/store/musicStore";
-import { useCallback, useEffect, useRef, useState } from "react";
-import SearchModal from "./SearchModal";
+import { useCallback, useRef, useState } from "react";
 
 export default function SearchBarModal({
   isInModal = false,
@@ -47,11 +46,11 @@ export default function SearchBarModal({
   };
 
   const handleInputFocus = () => {
-    open && setSearching(true);
+    if (open) setSearching(true);
   };
 
   const handleInputBlur = () => {
-    open && setSearching(false);
+    if (open) setSearching(false);
   };
 
   return (

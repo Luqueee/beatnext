@@ -1,6 +1,5 @@
 "use client";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import SearchBar from "./SearchBar";
 import SongResults from "../SongResults";
 import { useEffect, useState } from "react";
 import SearchBarModal from "./SearchBarModal";
