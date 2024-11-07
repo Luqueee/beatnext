@@ -1,42 +1,22 @@
 "use server";
-import type { Search } from "@/store/musicStore";
 const client_id = "6ZQ2Vr6GmERVhpEmkZmcNAuDQ3l9qaZe";
 
-interface SearchInterface {
-  id: number;
-  title: string;
-  artist: string;
-  duration: number;
-  artwork: string;
-  endpoint: string;
-  kind: string;
-}
-
-export async function search(query: string): Promise<Search[]> {
-  const fetch_url = `https://api-v2.soundcloud.com/search?q=${query}&client_id=${client_id}&limit=20&offset=0&app_locale=es`;
+export async function search(query: string): Promise<SoundCloud.Search[]> {
+  const fetch_url = `https://api-v2.soundcloud.com/search?q=${query}&client_id=${client_id}&limit=40&offset=0&app_locale=es`;
   const req_song = await fetch(fetch_url);
-  const data = await req_song.json();
+  const data = (await req_song.json()) as { collection: SoundCloud.Track[] };
   const songs = data.collection
-    .map(
-      (song: {
-        id: number;
-        title: string;
-        user: { username: string; avatar_url: string };
-        duration: number;
-        artwork_url: string;
-        kind: "playlist" | "track";
-      }) => {
-        return {
-          id: song.id,
-          title: song.title,
-          artist: song?.user?.username || "Unknown",
-          duration: song?.duration || 0,
-          artwork: song?.artwork_url || song?.user?.avatar_url || null,
-          endpoint: `/song?id=${song.id}`,
-          kind: song.kind,
-        };
-      }
-    )
+    .map((song) => {
+      return {
+        id: song.id,
+        title: song.title,
+        artist: song?.publisher_metadata?.artist || "Unknown",
+        duration: song?.duration || 0,
+        artwork: song?.artwork_url || "",
+        endpoint: `/song?id=${song.id}`,
+        kind: song.kind,
+      };
+    })
     .filter(
       (song: { title: string; artist: string }) =>
         !song.title?.includes("cover") &&
@@ -45,10 +25,8 @@ export async function search(query: string): Promise<Search[]> {
         song.artist !== "Unknown"
     );
 
-  const tracks = songs.filter((song: SearchInterface) => song.kind === "track");
-  const playlists = songs.filter(
-    (song: SearchInterface) => song.kind === "playlist"
-  );
+  const tracks = songs.filter((song) => song.kind === "track");
+  const playlists = songs.filter((song) => song.kind === "playlist");
 
   const sorted = [...tracks, ...playlists];
 

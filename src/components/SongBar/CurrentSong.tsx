@@ -35,12 +35,12 @@ const CurrentSong = ({ image, id, title, artists }: CurrentSongProps) => {
         <div className="w-16 h-16 bg-zinc-800 rounded-md shadow-lg overflow-hidden" />
       )}
       <div className="flex items-center">
-        <div className="flex flex-col max-w-[20vw] items-start justify-start gap-2 h-full z-50">
+        <div className="flex flex-col max-w-[25vw] items-start justify-start gap-2 h-full z-50">
           <a
             href={`/song/${id}`}
-            className="font-semibold text-sm block hover:underline text-start transition-all line-clamp-2"
+            className="font-semibold text-sm block hover:underline text-start transition-all"
           >
-            <p>{title}</p>
+            <p className="line-clamp-1">{title}</p>
           </a>
           <span className="text-xs text-start w-fit opacity-80">{artists}</span>
         </div>

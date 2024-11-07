@@ -1,4 +1,4 @@
-import Songs from "@/components/Songs";
+import SongsResults from "@/components/SongResults";
 export default function Home() {
-  return <Songs />;
+  return <SongsResults />;
 }

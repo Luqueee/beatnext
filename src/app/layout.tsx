@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { SongBar } from "@/components/SongBar";
+import NavBar from "@/components/NavBar";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -25,12 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative max-w-screen overflow-x-hidden h-[100dvh] grid grid-rows-[auto_80px]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased ring-0 outline-none relative max-w-screen overflow-x-hidden h-[100dvh] grid grid-rows-[70px_auto_80px]`}
       >
+        <NavBar />
         <div className="overflow-y-scroll ">{children}</div>
-
         <SongBar />
       </body>
     </html>

@@ -1,254 +1,126 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useMusicStore } from "@/store/musicStore";
-import { useEffect, useRef, useState } from "react";
-import DropdownVolume from "./DropDownVolume";
-import { Slider } from "@/components/ui/slider";
-import { Pause, Play, Volume, VolumeSilence } from "@/components/icons";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Play, Pause } from "lucide-react";
 import CurrentSong from "./CurrentSong";
-import { formatTime } from "@/utils";
-import { get } from "@/lib/soundcloud";
+import { get } from "@/lib/soundcloud/server";
+import VolumeControl from "./VolumeControl";
+import SongControl from "./SongControl";
 
-interface SongControlProps {
-  audio: React.RefObject<HTMLAudioElement>;
-}
-
-const SongControl = ({ audio }: SongControlProps) => {
-  const { currentTime, setCurrentTime } = useMusicStore((state) => state);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    audio.current?.addEventListener("timeupdate", handleTimeUpdate);
-
-    const interval = setInterval(() => {
-      if (audio.current) setCurrentTime(audio.current.currentTime);
-    }, 100);
-
-    return () => {
-      clearInterval(interval);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audio]);
-
-  const handleTimeUpdate = () => {
-    if (audio.current) setCurrentTime(audio.current.currentTime);
-  };
-
-  const duration = audio?.current?.duration ?? 0;
-
-  return (
-    <div className="flex gap-x-3 text-xs md:lg:justify-start justify-center">
-      <span className="opacity-50 w-12 text-right">
-        {formatTime(currentTime)}
-      </span>
-
-      <Slider
-        value={[currentTime]}
-        max={audio?.current?.duration ?? 0}
-        min={0}
-        className="md:lg:w-[200px] w-[100px] h-2 py-2"
-        onValueChange={(value) => {
-          const [newCurrentTime] = value;
-          if (audio.current) audio.current.currentTime = newCurrentTime;
-          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-          currentTime;
-        }}
-      />
-
-      <span className="opacity-50 w-12">
-        {duration ? formatTime(duration) : "0:00"}
-      </span>
-    </div>
-  );
-};
-
-const VolumeControl = () => {
-  const volume = useMusicStore((state) => state.volume);
-  const setVolume = useMusicStore((state) => state.setVolume);
-  const previousVolumeRef = useRef(volume);
-  const isVolumeSilenced = volume < 0.05;
-
-  const handleClickVolumen = () => {
-    if (isVolumeSilenced) {
-      setVolume(previousVolumeRef.current);
-    } else {
-      previousVolumeRef.current = volume;
-      setVolume(0);
-    }
-  };
-
-  return (
-    <div className="flex justify-center min-h-full items-center gap-x-2 text-white z-[99999999]">
-      <div className="md:lg:flex gap-2 hidden">
-        <button
-          type="button"
-          className="opacity-70 hover:opacity-100 transition"
-          name="volume-button"
-          onClick={handleClickVolumen}
-        >
-          {isVolumeSilenced ? <VolumeSilence /> : <Volume />}
-        </button>
-
-        <Slider
-          defaultValue={[100]}
-          max={100}
-          min={0}
-          value={[volume * 100]}
-          className="w-[95px] py-2 "
-          onValueChange={(value) => {
-            const [newVolume] = value;
-            const volumeValue = newVolume / 100;
-            setVolume(volumeValue);
-          }}
-        />
-      </div>
-      <div className="  md:lg:hidden block">
-        <DropdownVolume />
-      </div>
-    </div>
-  );
+const stringToBlob = (base64: string): Blob => {
+  const binaryString = atob(base64);
+  const arrayBuffer = Uint8Array.from(binaryString, (char) =>
+    char.charCodeAt(0)
+  ).buffer;
+  return new Blob([arrayBuffer]);
 };
 
 export default function SongBar() {
   const {
-    currentMusic,
-    setIsPlaying,
-    getIsPlaying,
-    volume,
     isPlaying,
-    previousID,
-    currentTime,
+    setIsPlaying,
+    setPlaying,
     setPreviousID,
     searching,
+    volume,
+    setVolume,
+    currentTime,
+    setCurrentTime,
+    setSearching,
+    currentMusic,
+    hydrated,
   } = useMusicStore((state) => state);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
-  const [titleSong, setTitle] = useState("");
-  const [artistSong, setArtist] = useState("");
-  const [imageSong, setImage] = useState("");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const configMusic = () => {
+  const [titleSong, setTitle] = useState<string>("");
+  const [artistSong, setArtist] = useState<string>("");
+  const [imageSong, setImage] = useState<string>("");
+
+  const configMusic = useCallback(async () => {
     const song_data = currentMusic;
-    console.log("song_data", song_data);
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
 
-    try {
-      if (song_data) {
-        const id_song = song_data.id;
-
-        if (audioRef.current && id_song) {
-          get(id_song.toString()).then(async (res) => {
-            //console.log(res);
-
-            if (res) {
-              // Decode base64 string to binary string
-              const binaryString = atob(res);
-              // Convert binary string to ArrayBuffer
-              const arrayBuffer = new Uint8Array(
-                [...binaryString].map((char) => char.charCodeAt(0))
-              ).buffer;
-
-              const blob = new Blob([arrayBuffer]);
-              console.log("song", blob);
-
-              if (!audioRef.current) return;
-
-              audioRef.current.src = URL.createObjectURL(blob); // Change the source
-              audioRef.current.load(); // Load the new source
-              audioRef.current.currentTime = currentTime;
-              setIsPlaying(true);
-              if (isPlaying) {
-                try {
-                  audioRef.current
-                    .play()
-                    .catch(() =>
-                      console.error("el audio no se pudo reproducir:")
-                    );
-                } catch {
-                  console.error("Error playing the audio");
-                }
-              }
-
-              setImage(song_data.preview_image);
-              setTitle(song_data.title);
-              setArtist(song_data.artist);
-            } else {
-              console.error("Buffer is undefined");
-              return;
-            }
-          });
+    if (song_data?.id && audioRef.current) {
+      try {
+        const res = await get(song_data.id.toString());
+        if (res) {
+          const blob = stringToBlob(res);
+          audioRef.current.src = URL.createObjectURL(blob);
+          audioRef.current.currentTime = currentTime;
+          audioRef.current.load();
+          setPlaying(true);
+          setImage(song_data.preview_image);
+          setTitle(song_data.title);
+          setArtist(song_data.artist);
+          if (isPlaying) await audioRef.current.play();
         }
-      }
-    } catch {
-      //console.error("Error loading audio", error);
-      console.error("Error loading audio");
-    }
-  };
-
-  const handlePlaying = () => {
-    if (!isPlaying) {
-      audioRef.current?.pause();
-    } else {
-      if (audioRef.current) {
-        audioRef.current
-          ?.play()
-          .catch((error) =>
-            console.error("Error playing the audio:", error.message)
-          );
+      } catch {
+        console.error("Error loading audio");
       }
     }
-  };
+  }, [currentMusic, volume, currentTime, isPlaying]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     const interval = setInterval(() => {
       if (audioRef.current?.ended) {
-        setIsPlaying(false);
-        audioRef.current.currentTime = 0;
+        setIsPlaying();
+        if (audioRef.current) audioRef.current.currentTime = 0;
       }
     }, 100);
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [audioRef]);
+    return () => clearInterval(interval);
+  }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     configMusic();
   }, [currentMusic]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     const togglePlayPause = (event: KeyboardEvent) => {
       if (event.code === "Space" && !searching) {
+        // Verificar si el evento se originó en un input, textarea o elemento con atributo contenteditable
+        const target = event.target as HTMLElement;
+        if (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
         event.preventDefault();
-        setIsPlaying(!getIsPlaying()); // Toggle `isPlaying`
-        //console.log("isPlaying bar", getIsPlaying());
+        setIsPlaying();
       }
     };
 
     document.addEventListener("keydown", togglePlayPause);
+    return () => document.removeEventListener("keydown", togglePlayPause);
+  }, [isPlaying, searching]);
 
-    return () => {
-      document.removeEventListener("keydown", togglePlayPause);
-    };
-  }, [searching]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    window.addEventListener("beforeunload", () => setPreviousID(0));
-    return () => {
-      window.removeEventListener("beforeunload", () => setPreviousID(0));
-    };
-  }, [previousID]);
+    const resetPreviousID = () => setPreviousID(0);
+    window.addEventListener("beforeunload", resetPreviousID);
+    return () => window.removeEventListener("beforeunload", resetPreviousID);
+  }, [setPreviousID]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    handlePlaying();
+    if (isPlaying) {
+      audioRef.current
+        ?.play()
+        .catch((error) =>
+          console.error("Error playing the audio:", error.message)
+        );
+    } else {
+      audioRef.current?.pause();
+    }
   }, [isPlaying]);
+
+  useEffect(() => {
+    setPlaying(false);
+  }, []);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -257,8 +129,7 @@ export default function SongBar() {
   }, [volume]);
 
   const handleClick = () => {
-    setIsPlaying(!getIsPlaying());
-    console.log("isPlaying", getIsPlaying());
+    setIsPlaying();
   };
 
   return (
@@ -272,17 +143,27 @@ export default function SongBar() {
         />
       </div>
       <div className="flex w-full h-full justify-center px-8 items-center">
-        <button
-          type="button"
-          title="Play / Pause"
-          name="play-button"
-          onClick={handleClick}
-          className="bg-white rounded-full p-2"
-        >
-          {isPlaying === true ? <Pause /> : <Play />}
-        </button>
-        <SongControl audio={audioRef} />
-        <VolumeControl />
+        {hydrated && (
+          <button
+            type="button"
+            title="Play / Pause"
+            name="play-button"
+            onClick={handleClick}
+            className=" rounded-full w-10 h-10 flex items-center justify-center p-2 border border-white bg-white"
+          >
+            {isPlaying ? (
+              <Pause strokeWidth={1.5} color="black" fill="black" />
+            ) : (
+              <Play color="black" fill="black" />
+            )}
+          </button>
+        )}
+        <SongControl
+          audio={audioRef}
+          currentTime={currentTime}
+          setCurrentTime={setCurrentTime}
+        />
+        {hydrated && <VolumeControl volume={volume} setVolume={setVolume} />}
       </div>
       <audio
         ref={audioRef}
