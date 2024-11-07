@@ -2,6 +2,7 @@
 
 import { useDebounce } from "@/hooks/useDebounce";
 import { search } from "@/lib/soundcloud/server";
+import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/store/musicStore";
 import { useCallback, useRef, useState } from "react";
 
@@ -57,7 +58,7 @@ export default function SearchBarModal({
     <div
       className={` ${
         isInModal ? "w-full" : "md:lg:w-[40%] w-full"
-      }  h-full ${className} inline-flex relative`}
+      }  h-12 ${className} inline-flex relative`}
     >
       <input
         type="text"
@@ -67,7 +68,11 @@ export default function SearchBarModal({
         onBlur={handleInputBlur}
         placeholder="Search for a song..."
         onChange={handleInput}
-        className={`text-black flex-grow rounded-lg pl-2 z-10`}
+        className={cn(
+          "text-black flex-grow rounded-lg pl-2 z-10 ",
+          "bg-zinc-900 hover:bg-zinc-800 transition-all duration-300 bg-opacity-50 border border-zinc-800 focus:bg-zinc-800 focus:rounded-sm ",
+          "ring-0 outline-none text-white "
+        )}
       />
     </div>
   );
