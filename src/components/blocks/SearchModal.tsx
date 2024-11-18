@@ -1,10 +1,11 @@
 "use client";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import SongResults from "../SongResults";
+import SongResults from "../songResults/SongResults";
 import { useEffect, useState } from "react";
 import SearchBarModal from "./SearchBarModal";
 import useWindow from "@/hooks/useWindow";
 import { Search } from "lucide-react";
+import { DialogTitle } from "@radix-ui/react-dialog";
 export default function SearchModal() {
   const [open, setOpen] = useState(false);
   const { isDesktop } = useWindow();
@@ -23,6 +24,7 @@ export default function SearchModal() {
   return (
     <div className="h-full absolute right-4 top-0 z-20">
       <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTitle className="text-2xl font-bold text-white" />
         <DialogTrigger className="h-full">
           {isDesktop ? (
             <p className="text-sm text-white h-[70%]">
@@ -35,7 +37,10 @@ export default function SearchModal() {
           )}
         </DialogTrigger>
 
-        <DialogContent className="h-[80vh] md:lg:w-[60vw] w-[90%] flex flex-col">
+        <DialogContent
+          className="h-[80vh] md:lg:w-[60vw] w-[90%] flex flex-col"
+          aria-describedby={undefined}
+        >
           <SearchBarModal open={open} isInModal={true} className="h-10" />
           <div className=" overflow-y-scroll">
             <SongResults />

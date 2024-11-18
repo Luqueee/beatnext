@@ -1,60 +1,36 @@
+import type { Song } from "@/models/playlistSchema";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-// TODO: Add previousID to Music Store to look if the previousID match with the currentID
-interface CurrentMusic {
-  song?: Blob | undefined;
-  title: string;
-  artist: string;
-  id?: number | undefined;
-  preview_image: string;
-}
-
+type context = "playlist" | "album" | "single" | "search" | "queue" | "";
 interface MusicStoreState {
-  isPlaying: boolean;
-  currentTime: number;
-  previousID: number;
-  writing: boolean;
-  currentMusic: CurrentMusic;
-  hydrated: boolean;
-  searching: boolean;
-  volume: number;
-  songResults: SoundCloud.Search[];
+  tracks: Song[];
+  currentIndex: number;
+  context: context;
+  hydrated?: boolean;
 }
 
 interface MusicStoreActions {
-  setVolume: (volume: number) => void;
-  setWriting: (writing: boolean) => void;
-  setIsPlaying: () => void;
-  setPlaying: (isPlaying: boolean) => void;
-  getIsPlaying: () => boolean;
-  setCurrentMusic: (currentMusic: CurrentMusic) => void;
-  setCurrentTime: (currentTime: number) => void;
-  setPreviousID: (previousID: number) => void;
-  setSearching: (searching: boolean) => void;
+  setTracks: (tracks: Song[]) => void;
+  pushTrack: (track: Song) => void;
+  removeTrack: (index: number) => void;
+  setCurrentIndex: (index: number) => void;
+  setContext: (context: context) => void;
   setHydrated: () => void;
-  setSongResults: (songResults: SoundCloud.Search[]) => void;
+  jumpTrack: (index: number) => void;
+  generateTracks: (tracks: Song[], index?: number, context?: context) => void;
+  getTracks: () => Song[];
+  getContext: () => context;
 }
 
 export type MusicStore = MusicStoreState & MusicStoreActions;
 
 export const defaultMusicStore: MusicStoreState = {
-  isPlaying: false,
-  currentTime: 0,
-  previousID: 0,
-  writing: false,
+  tracks: [] as Song[],
+  currentIndex: -1,
+  context: "",
   hydrated: false,
-  currentMusic: {
-    id: undefined,
-    song: undefined,
-    title: "",
-    artist: "",
-    preview_image: "",
-  },
-  searching: false,
-  volume: 1.0,
-  songResults: [],
 };
 
 export const useMusicStore = create<
@@ -64,20 +40,41 @@ export const useMusicStore = create<
   persist(
     immer<MusicStore>((set, get) => ({
       ...defaultMusicStore,
-      setHydrated: () => set({ hydrated: true }),
-      setVolume: (volume: number) => set({ volume }),
-      setWriting: (writing: boolean) => set({ writing }),
-      setIsPlaying: () => set((state) => ({ isPlaying: !state.isPlaying })),
-      setPlaying: (isPlaying: boolean) => set({ isPlaying }),
-      getIsPlaying: () => {
-        return get().isPlaying;
-      },
-      setCurrentMusic: (currentMusic: CurrentMusic) => set({ currentMusic }),
-      setCurrentTime: (currentTime: number) => set({ currentTime }),
-      setPreviousID: (previousID: number) => set({ previousID }),
-      setSearching: (searching: boolean) => set({ searching }),
-      setSongResults: (songResults: SoundCloud.Search[]) =>
-        set({ songResults }),
+      generateTracks: (tracks, index = 0, context: context = "playlist") =>
+        set((state) => {
+          state.tracks = tracks;
+          state.currentIndex = index;
+          state.context = context;
+        }),
+
+      setTracks: (tracks) =>
+        set((state) => {
+          state.tracks = tracks;
+        }),
+      pushTrack: (track) =>
+        set((state) => {
+          state.tracks.push(track);
+        }),
+      removeTrack: (index) => set((state) => state.tracks.splice(index, 1)),
+      setCurrentIndex: (index) =>
+        set((state) => {
+          state.currentIndex = index;
+        }),
+      setContext: (context) =>
+        set((state) => {
+          state.context = context;
+        }),
+
+      jumpTrack: (index) =>
+        set((state) => {
+          state.currentIndex = index;
+        }),
+      setHydrated: () =>
+        set((state) => {
+          state.hydrated = true;
+        }),
+      getTracks: () => get().tracks,
+      getContext: () => get().context,
     })),
     {
       // ...
@@ -91,4 +88,4 @@ export const useMusicStore = create<
   )
 );
 
-export const musicStore = useMusicStore;
+export default useMusicStore;

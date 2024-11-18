@@ -1,14 +1,14 @@
 import { useRef } from "react";
 import { Volume, VolumeSilence } from "../icons";
 import { Slider } from "../ui/slider";
-import type { MusicStore } from "@/store/musicStore";
+import type {} from "@/store/musicStore";
 import DropdownVolume from "./DropDownVolume";
 
 const VolumeControl = ({
   volume,
   setVolume,
 }: {
-  volume: MusicStore["volume"];
+  volume: number;
   setVolume: (volume: number) => void;
 }) => {
   const previousVolumeRef = useRef(volume);

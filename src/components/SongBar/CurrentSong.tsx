@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import Link from "next/link";
 
 interface CurrentSongProps {
   image: string;
@@ -8,10 +8,6 @@ interface CurrentSongProps {
 }
 
 const CurrentSong = ({ image, id, title, artists }: CurrentSongProps) => {
-  useEffect(() => {
-    console.log("CurrentSong ", image, id, title, artists);
-  }, [artists, id, image, title]);
-
   const handleClick = () => {
     window.location.href = `/song/${id}`;
   };
@@ -36,12 +32,12 @@ const CurrentSong = ({ image, id, title, artists }: CurrentSongProps) => {
       )}
       <div className="flex items-center">
         <div className="flex flex-col max-w-[25vw] items-start justify-start gap-2 h-full z-50">
-          <a
+          <Link
             href={`/song/${id}`}
             className="font-semibold text-sm block hover:underline text-start transition-all"
           >
             <p className="line-clamp-1">{title}</p>
-          </a>
+          </Link>
           <span className="text-xs text-start w-fit opacity-80">{artists}</span>
         </div>
       </div>

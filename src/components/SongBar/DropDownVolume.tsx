@@ -1,4 +1,4 @@
-import { useMusicStore } from "@/store/musicStore";
+import { useSongBarStore } from "@/store";
 
 import {
   DropdownMenu,
@@ -10,8 +10,7 @@ import { Volume, VolumeSilence } from "@/components/icons";
 import { Slider } from "@/components/ui/slider";
 
 export default function DropdownVolume() {
-  const volume = useMusicStore((state) => state.volume);
-  const setVolume = useMusicStore((state) => state.setVolume);
+  const { volume, setVolume } = useSongBarStore((state) => state);
   const previousVolumeRef = useRef(volume);
   const isVolumeSilenced = volume < 0.05;
 

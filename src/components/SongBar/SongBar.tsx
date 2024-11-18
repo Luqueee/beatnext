@@ -1,87 +1,68 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { useMusicStore } from "@/store/musicStore";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause } from "lucide-react";
+import { useMusicStore, useSongBarStore } from "@/store";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
+  Heart,
+  ListVideo,
+} from "lucide-react";
 import CurrentSong from "./CurrentSong";
-import { get } from "@/lib/soundcloud/server";
 import VolumeControl from "./VolumeControl";
 import SongControl from "./SongControl";
+import { useConfig, useNext } from "./hooks";
+import type { session } from "@/auth";
+import useFav from "./hooks/useFav";
+import useModalPlaylist from "@/hooks/useModalPlaylist";
 
-const stringToBlob = (base64: string): Blob => {
-  const binaryString = atob(base64);
-  const arrayBuffer = Uint8Array.from(binaryString, (char) =>
-    char.charCodeAt(0)
-  ).buffer;
-  return new Blob([arrayBuffer]);
-};
-
-export default function SongBar() {
+export default function SongBar({ session }: { session: session }) {
+  const [isHydrated, setIsHydrated] = useState(false);
   const {
     isPlaying,
     setIsPlaying,
-    setPlaying,
-    setPreviousID,
     searching,
     volume,
     setVolume,
     currentTime,
     setCurrentTime,
     currentMusic,
-    hydrated,
-  } = useMusicStore((state) => state);
+    setPlaying,
+  } = useSongBarStore((state) => state);
+
+  const { currentIndex } = useMusicStore((state) => state);
+  const [next, prev] = useNext();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [titleSong, setTitle] = useState<string>("");
-  const [artistSong, setArtist] = useState<string>("");
-  const [imageSong, setImage] = useState<string>("");
+  const { songParams, duration, configMusic, setDuration } = useConfig({
+    playerRef: audioRef.current,
+  });
 
-  const configMusic = useCallback(async () => {
-    const song_data = currentMusic;
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-
-    if (song_data?.id && audioRef.current) {
-      try {
-        const res = await get(song_data.id.toString());
-        if (res) {
-          const blob = stringToBlob(res);
-          audioRef.current.src = URL.createObjectURL(blob);
-          audioRef.current.currentTime = currentTime;
-          audioRef.current.load();
-          setPlaying(true);
-          setImage(song_data.preview_image);
-          setTitle(song_data.title);
-          setArtist(song_data.artist);
-          if (isPlaying) await audioRef.current.play();
-        }
-      } catch {
-        console.error("Error loading audio");
-      }
-    }
-  }, [currentMusic, volume, currentTime, isPlaying]);
+  const { isFav, handleFav } = useFav(songParams, session);
+  const { handleOpenModalPlaylist } = useModalPlaylist({
+    title: songParams?.title ?? "",
+    artist: songParams?.artist ?? "",
+    cover: songParams?.image ?? "",
+    id: Number(songParams?.id) ?? "",
+  });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (audioRef.current?.ended) {
-        setIsPlaying();
-        if (audioRef.current) audioRef.current.currentTime = 0;
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
+    setCurrentTime(0);
     configMusic();
-  }, [currentMusic]);
+  }, [currentMusic, currentIndex]);
+
+  useEffect(() => {
+    audioRef.current?.play().catch((error) => {
+      console.error("Error playing audio:", error);
+    });
+  }, [songParams]);
 
   useEffect(() => {
     const togglePlayPause = (event: KeyboardEvent) => {
       if (event.code === "Space" && !searching) {
-        // Verificar si el evento se originó en un input, textarea o elemento con atributo contenteditable
         const target = event.target as HTMLElement;
         if (
           target.tagName === "INPUT" ||
@@ -91,7 +72,7 @@ export default function SongBar() {
           return;
         }
         event.preventDefault();
-        setIsPlaying();
+        handlePlay();
       }
     };
 
@@ -99,78 +80,175 @@ export default function SongBar() {
     return () => document.removeEventListener("keydown", togglePlayPause);
   }, [isPlaying, searching]);
 
-  useEffect(() => {
-    const resetPreviousID = () => setPreviousID(0);
-    window.addEventListener("beforeunload", resetPreviousID);
-    return () => window.removeEventListener("beforeunload", resetPreviousID);
-  }, [setPreviousID]);
-
-  useEffect(() => {
-    if (isPlaying) {
-      audioRef.current
-        ?.play()
-        .catch((error) =>
-          console.error("Error playing the audio:", error.message)
-        );
-    } else {
-      audioRef.current?.pause();
-    }
-  }, [isPlaying]);
-
-  useEffect(() => {
-    setPlaying(false);
-  }, []);
-
-  useEffect(() => {
+  const handlePlay = () => {
     if (audioRef.current) {
-      audioRef.current.volume = volume;
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch((error) => {
+          console.error("Error playing audio:", error);
+        });
+      }
+      setIsPlaying();
     }
-  }, [volume]);
-
-  const handleClick = () => {
-    setIsPlaying();
   };
 
+  const handleClick = () => {
+    const context = new AudioContext();
+    if (context.state === "suspended") {
+      context.resume();
+    }
+
+    handlePlay();
+  };
+
+  useEffect(() => {
+    setIsHydrated(true);
+    setPlaying(false);
+
+    return () => {
+      setIsHydrated(true);
+    };
+  }, []);
+
+  // const audioSources = useRef(
+  //   new Map<HTMLAudioElement, MediaElementAudioSourceNode>()
+  // );
+  // const audioContext = useRef<AudioContext | null>(null);
+
+  // useEffect(() => {
+  //   if (!audioRef.current) return;
+
+  //   // Create a single AudioContext instance
+  //   if (!audioContext.current) {
+  //     audioContext.current = new AudioContext();
+  //   }
+  //   const context = audioContext.current;
+
+  //   // Resume context if suspended (important for some browsers like Safari)
+  //   if (context.state === "suspended") {
+  //     context
+  //       .resume()
+  //       .catch((error) => console.error("Error resuming AudioContext:", error));
+  //   }
+
+  //   // Create a new MediaElementAudioSourceNode if it doesn't exist
+  //   let source = audioSources.current.get(audioRef.current);
+  //   if (!source) {
+  //     source = context.createMediaElementSource(audioRef.current);
+  //     audioSources.current.set(audioRef.current, source);
+  //   }
+
+  //   // Frequency bands in Hz for Bass, Midrange, and Treble
+  //   const bandSplit = [80, 1200, 10000]; // Adjusted for better coverage
+
+  //   // Low frequencies (Bass)
+  //   const lBand = context.createBiquadFilter();
+  //   lBand.type = "lowshelf";
+  //   lBand.frequency.value = bandSplit[0];
+  //   lBand.gain.value = 8; // Gentle boost for richer bass
+
+  //   // Mid frequencies (Vocals, instruments)
+  //   const mBand = context.createBiquadFilter();
+  //   mBand.type = "peaking";
+  //   mBand.frequency.value = bandSplit[1];
+  //   mBand.gain.value = 6; // Slight boost for clarity
+  //   mBand.Q.value = 1.5; // Moderate width for natural sound
+
+  //   // High frequencies (Treble)
+  //   const hBand = context.createBiquadFilter();
+  //   hBand.type = "highshelf";
+  //   hBand.frequency.value = bandSplit[2];
+  //   hBand.gain.value = 4; // Subtle lift for brightness
+
+  //   // Connect the audio nodes
+  //   source
+  //     .connect(lBand)
+  //     .connect(mBand)
+  //     .connect(hBand)
+  //     .connect(context.destination);
+
+  //   // Debugging output to check filter states
+  //   console.log("EQ settings applied: ", { lBand, mBand, hBand });
+
+  //   // Cleanup function to release resources
+  //   return () => {
+  //     if (audioContext.current) {
+  //       audioContext.current
+  //         .close()
+  //         .catch((err) => console.error("Error closing AudioContext:", err));
+  //       audioContext.current = null;
+  //     }
+  //   };
+  // }, [audioRef.current]); // Ensure effect runs when audioRef changes
+
+  useEffect(() => {
+    // Ajusta el volumen
+    if (audioRef.current)
+      audioRef.current.volume = Math.min(Math.max(volume, 0), 1);
+  }, [volume]);
+
+  if (!isHydrated) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-row justify-center relative items-center w-full z-50 bg-zinc-900 backdrop-blur-sm bg-opacity-5 py-6 md:lg:pl-8 pl-0 md:lg:gap-2 gap-8 shadow-lg ">
-      <div className=" md:lg:block hidden h-full absolute left-0 ">
+    <div className="flex flex-row justify-between relative items-center w-full z-50 bg-zinc-900 backdrop-blur-sm bg-opacity-5 py-6 md:lg:pl-8 pl-0 md:lg:gap-2 gap-8 shadow-lg">
+      <div className="md:lg:block hidden h-full absolute left-0">
         <CurrentSong
-          title={titleSong ?? ""}
-          artists={artistSong ?? ""}
-          image={imageSong ?? ""}
-          id={currentMusic.id?.toString() ?? ""}
+          title={songParams?.title ?? ""}
+          artists={songParams?.artist ?? ""}
+          image={songParams?.image ?? ""}
+          id={songParams?.id?.toString() ?? ""}
         />
       </div>
-      <div className="flex w-full h-full justify-center px-8 items-center">
-        {hydrated && (
-          <button
-            type="button"
-            title="Play / Pause"
-            name="play-button"
-            onClick={handleClick}
-            className=" rounded-full w-10 h-10 flex items-center justify-center p-2 border border-white bg-white"
-          >
-            {isPlaying ? (
-              <Pause strokeWidth={1.5} color="black" fill="black" />
-            ) : (
-              <Play color="black" fill="black" />
-            )}
-          </button>
-        )}
+      <div className="flex w-full h-full justify-center px-8 gap-4 items-center">
         <SongControl
-          audio={audioRef}
+          audioRef={audioRef.current}
           currentTime={currentTime}
+          duration={duration}
           setCurrentTime={setCurrentTime}
         />
-        {hydrated && <VolumeControl volume={volume} setVolume={setVolume} />}
+        <button type="button" onClick={prev}>
+          <SkipBack />
+        </button>
+        <button
+          type="button"
+          title="Play / Pause"
+          name="play-button"
+          id="playButton"
+          onClick={handleClick}
+          className="rounded-full w-10 h-10 flex items-center justify-center p-2 border border-white bg-white"
+        >
+          {isPlaying ? (
+            <Pause strokeWidth={1.5} color="black" fill="black" />
+          ) : (
+            <Play color="black" fill="black" />
+          )}
+        </button>
+        <button type="button" onClick={next}>
+          <SkipForward />
+        </button>
+        <VolumeControl volume={volume} setVolume={setVolume} />
       </div>
+      <div className="flex gap-4">
+        <button type="button" onClick={handleFav}>
+          <Heart fill={isFav ? "white" : ""} />
+        </button>
+        <button type="button" onClick={handleOpenModalPlaylist}>
+          <ListVideo />
+        </button>
+      </div>
+      {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
       <audio
         ref={audioRef}
-        onError={() => console.error("Error loading audio")}
-      >
-        <track kind="captions" src="captions.vtt" label="English" default />
-        Your browser does not support the audio element.
-      </audio>
+        src={songParams?.url}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={next}
+        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+      />
     </div>
   );
 }

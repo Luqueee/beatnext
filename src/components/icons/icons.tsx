@@ -1,107 +1,5 @@
-export const Pause = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    role="img"
-    height="16"
-    width="16"
-    aria-hidden="true"
-    viewBox="0 0 16 16"
-  >
-    <path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z" />
-  </svg>
-);
-
-export const Play = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    role="img"
-    height="16"
-    width="16"
-    aria-hidden="true"
-    viewBox="0 0 16 16"
-  >
-    <path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z" />
-  </svg>
-);
-
-export const Add = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    className="icon icon-tabler icons-tabler-outline icon-tabler-plus"
-  >
-    {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-    {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-    <path d="M12 5l0 14"></path>
-    <path d="M5 12l14 0" />
-  </svg>
-);
-
-export const AddBlack = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="black"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    className="icon icon-tabler icons-tabler-outline icon-tabler-plus"
-  >
-    {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-    {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-    <path d="M12 5l0 14"></path>
-    {/* biome-ignore lint/style/useSelfClosingElements: <explanation> */}
-    <path d="M5 12l14 0"></path>
-  </svg>
-);
-
-export const Remove = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="#000000"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    className="icon icon-tabler icons-tabler-outline icon-tabler-heart"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
-  </svg>
-);
-
-export const RemoveFilled = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="#000000"
-    className="icon icon-tabler icons-tabler-filled icon-tabler-heart"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M6.979 3.074a6 6 0 0 1 4.988 1.425l.037 .033l.034 -.03a6 6 0 0 1 4.733 -1.44l.246 .036a6 6 0 0 1 3.364 10.008l-.18 .185l-.048 .041l-7.45 7.379a1 1 0 0 1 -1.313 .082l-.094 -.082l-7.493 -7.422a6 6 0 0 1 3.176 -10.215z" />
-  </svg>
-);
+import * as React from "react";
+import type { SVGProps } from "react";
 
 export const VolumeSilence = () => (
   <svg
@@ -136,103 +34,46 @@ export const Volume = () => (
   </svg>
 );
 
-export const Prev = () => (
+export const Google = (props: SVGProps<SVGSVGElement>) => (
   <svg
-    fill="currentColor"
-    role="img"
-    height="16"
-    width="16"
-    aria-hidden="true"
-    viewBox="0 0 16 16"
-  >
-    <path d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-.7.7H1.7a.7.7 0 0 1-.7-.7V1.7a.7.7 0 0 1 .7-.7h1.6z" />
-  </svg>
-);
-export const Next = () => (
-  <svg
-    fill="currentColor"
-    role="img"
-    height="16"
-    width="16"
-    aria-hidden="true"
-    viewBox="0 0 16 16"
-  >
-    <path d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 .7.7h1.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-1.6z" />
-  </svg>
-);
-
-export const Favorite = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
+    width="1.5em"
+    height="1.5em"
+    viewBox="0 0 256 262"
     xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    stroke="black"
-    fill="none"
-    className="icon icon-tabler icons-tabler-outline icon-tabler-heart"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572" />
-  </svg>
-);
-
-export const FavoriteFilled = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className="icon icon-tabler icons-tabler-filled icon-tabler-heart"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M6.979 3.074a6 6 0 0 1 4.988 1.425l.037 .033l.034 -.03a6 6 0 0 1 4.733 -1.44l.246 .036a6 6 0 0 1 3.364 10.008l-.18 .185l-.048 .041l-7.45 7.379a1 1 0 0 1 -1.313 .082l-.094 -.082l-7.493 -7.422a6 6 0 0 1 3.176 -10.215z" />
-  </svg>
-);
-
-export const FavoriteFilledBlack = () => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="black"
-    className="icon icon-tabler icons-tabler-filled icon-tabler-heart"
-  >
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M6.979 3.074a6 6 0 0 1 4.988 1.425l.037 .033l.034 -.03a6 6 0 0 1 4.733 -1.44l.246 .036a6 6 0 0 1 3.364 10.008l-.18 .185l-.048 .041l-7.45 7.379a1 1 0 0 1 -1.313 .082l-.094 -.082l-7.493 -7.422a6 6 0 0 1 3.176 -10.215z" />
-  </svg>
-);
-
-export const MusicIcon = ({
-  height = "1em",
-  strokeWidth = "2",
-  fill = "none",
-  focusable = "false",
-  ...props
-}: Omit<React.SVGProps<SVGSVGElement>, "children">) => (
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-  <svg
-    role="img"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    height={height}
-    focusable={focusable}
+    preserveAspectRatio="xMidYMid"
     {...props}
   >
-    <g
-      fill={fill}
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={strokeWidth}
-    >
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
-    </g>
+    <path
+      d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+      fill="#4285F4"
+    />
+    <path
+      d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+      fill="#34A853"
+    />
+    <path
+      d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+      fill="#FBBC05"
+    />
+    <path
+      d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+      fill="#EB4335"
+    />
+  </svg>
+);
+
+export const Spotify = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 256 256"
+    width="1.5em"
+    height="1.5em"
+    xmlns="http://www.w3.org/2000/svg"
+    preserveAspectRatio="xMidYMid"
+    {...props}
+  >
+    <path
+      d="M128 0C57.308 0 0 57.309 0 128c0 70.696 57.309 128 128 128 70.697 0 128-57.304 128-128C256 57.314 198.697.007 127.998.007l.001-.006Zm58.699 184.614c-2.293 3.76-7.215 4.952-10.975 2.644-30.053-18.357-67.885-22.515-112.44-12.335a7.981 7.981 0 0 1-9.552-6.007 7.968 7.968 0 0 1 6-9.553c48.76-11.14 90.583-6.344 124.323 14.276 3.76 2.308 4.952 7.215 2.644 10.975Zm15.667-34.853c-2.89 4.695-9.034 6.178-13.726 3.289-34.406-21.148-86.853-27.273-127.548-14.92-5.278 1.594-10.852-1.38-12.454-6.649-1.59-5.278 1.386-10.842 6.655-12.446 46.485-14.106 104.275-7.273 143.787 17.007 4.692 2.89 6.175 9.034 3.286 13.72v-.001Zm1.345-36.293C162.457 88.964 94.394 86.71 55.007 98.666c-6.325 1.918-13.014-1.653-14.93-7.978-1.917-6.328 1.65-13.012 7.98-14.935C93.27 62.027 168.434 64.68 215.929 92.876c5.702 3.376 7.566 10.724 4.188 16.405-3.362 5.69-10.73 7.565-16.4 4.187h-.006Z"
+      fill="#1ED760"
+    />
   </svg>
 );

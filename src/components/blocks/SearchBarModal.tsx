@@ -3,7 +3,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { search } from "@/lib/soundcloud/server";
 import { cn } from "@/lib/utils";
-import { useMusicStore } from "@/store/musicStore";
+import { useSongBarStore } from "@/store";
 import { useCallback, useRef, useState } from "react";
 
 export default function SearchBarModal({
@@ -15,7 +15,7 @@ export default function SearchBarModal({
   open: boolean;
   className?: string;
 }) {
-  const { setSearching, setSongResults, searching } = useMusicStore(
+  const { setSearching, setSongResults, searching } = useSongBarStore(
     (state) => state
   );
 

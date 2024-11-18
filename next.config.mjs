@@ -10,7 +10,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "i1.sndcdn.com",
       },
+      {
+        protocol: "https",
+        hostname: "i.scdn.co",
+      },
     ],
+  },
+  experimental: {
+    serverComponentsExternalPackages: ["@mongoose"],
   },
 };
 

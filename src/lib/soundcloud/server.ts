@@ -34,12 +34,7 @@ export async function search(query: string): Promise<SoundCloud.Search[]> {
   return sorted;
 }
 
-export async function getInfo(id: string): Promise<{
-  title: string;
-  artist: string;
-  id: number;
-  artwork_url: string;
-}> {
+export async function getInfo(id: string): Promise<SoundCloud.Track> {
   const fetch_url = `https://api-v2.soundcloud.com/tracks/${id}?client_id=${client_id}`;
 
   const req_song = await fetch(fetch_url);
@@ -50,14 +45,14 @@ export async function getInfo(id: string): Promise<{
 }
 
 export async function get(id: string): Promise<string | null> {
-  console.log("Getting song", id);
+  //console.log("Getting song", id);
   const fetch_url = `https://api-v2.soundcloud.com/tracks/${id}?client_id=${client_id}`;
 
   const req_song = await fetch(fetch_url);
   const data = await req_song.json();
   //console.log(data);
 
-  console.log(data.media?.transcodings);
+  //console.log(data.media?.transcodings);
   try {
     if (data.media?.transcodings[1]?.format?.protocol === "progressive") {
       const url_buffer = data.media?.transcodings[1]?.url;
@@ -79,15 +74,11 @@ export async function get(id: string): Promise<string | null> {
 
     const buffers: Uint8Array[] = [];
 
-    await Promise.all(
-      m3u
-        .filter((line) => line.includes("https"))
-        .map(async (line) => {
-          const req = await fetch(line);
-          const res = await req.arrayBuffer();
-          buffers.push(new Uint8Array(res));
-        })
-    );
+    for (const line of m3u.filter((line) => line.includes("https"))) {
+      const req = await fetch(line);
+      const res = await req.arrayBuffer();
+      buffers.push(new Uint8Array(res));
+    }
 
     const arrayBuffer = await new Blob(buffers).arrayBuffer();
     return Buffer.from(arrayBuffer).toString("base64");
