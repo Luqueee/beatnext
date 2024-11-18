@@ -21,6 +21,9 @@ export default async function Profile() {
           <p className=" text-2xl">{session?.user?.name}</p>
           <p>{session?.user?.email}</p>
         </div>
+        <div>
+          <p>Using Spotify!</p>
+        </div>
       </div>
       <ModalConfig session={session} />
       {session ? (
